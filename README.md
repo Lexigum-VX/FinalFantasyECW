@@ -1,4 +1,4 @@
-# FinalFantasyECW - Web API (.NET 10 + Entity Framework Core)
+# FinalFantasyECW - Web API (.NET 8 + Entity Framework Core)
 
 API para builds de **Final Fantasy VII Ever Crisis**, baseada em **Entity Framework Core** com **SQLite**, com frontend estático para exploração rápida dos dados.
 
@@ -23,7 +23,7 @@ Além da API, a rota `/` serve um frontend mock (`wwwroot/index.html`) que facil
 ## Stack
 
 - ASP.NET Core Web API (Controllers)
-- .NET 10 (`net10.0`)
+- .NET 8 (`net8.0`)
 - Entity Framework Core + SQLite
 - OpenAPI
 
@@ -68,24 +68,24 @@ Calcula build:
 
 ## Como resolver "SDK .NET não está instalado"
 
-Neste projeto é necessário **.NET SDK 10 (preview)**, porque o `TargetFramework` é `net10.0`.
+Neste projeto é necessário **.NET SDK 8**, porque o `TargetFramework` é `net8.0`.
 
 ### 1) Verificar se tens SDK
 ```bash
 dotnet --info
 ```
 
-Se não existir comando `dotnet` ou não aparecer `10.0.x`, instala o SDK.
+Se não existir comando `dotnet` ou não aparecer `8.0.x`, instala o SDK.
 
-### 2) Instalar o SDK .NET 10 Preview
+### 2) Instalar o SDK .NET 8
 
 Site oficial da Microsoft:
-- https://dotnet.microsoft.com/download/dotnet/10.0
+- https://dotnet.microsoft.com/download/dotnet/8.0
 
 Escolhe o instalador do teu sistema operativo.
 
 #### Ubuntu/Debian (exemplo genérico)
-Segue os comandos oficiais da Microsoft para adicionar feed e instalar `dotnet-sdk-10.0`.
+Segue os comandos oficiais da Microsoft para adicionar feed e instalar `dotnet-sdk-8.0`.
 
 #### Windows
 - Instalar o `.exe` do SDK.
@@ -99,13 +99,13 @@ Segue os comandos oficiais da Microsoft para adicionar feed e instalar `dotnet-s
 ```bash
 dotnet --list-sdks
 ```
-Deves ver uma linha `10.0.xxx`.
+Deves ver uma linha `8.0.xxx`.
 
 ## Guia completo para clonar e correr na tua máquina
 
 ### Pré-requisitos
 - Git
-- .NET SDK 10 Preview
+- .NET SDK 8
 
 ### Passos
 
