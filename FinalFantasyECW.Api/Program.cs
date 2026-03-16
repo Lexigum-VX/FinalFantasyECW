@@ -23,6 +23,9 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
 app.MapGet("/api/characters", async (EquipmentService service, CancellationToken cancellationToken) =>
     Results.Ok(await service.GetCharactersAsync(cancellationToken)))
     .WithName("GetCharacters");
@@ -33,11 +36,15 @@ app.MapGet("/api/weapons", async (
         string? category,
         string? element,
         string? abilityType,
+        string? abilityElement,
+        string? effectType,
         int? minPhysicalAttack,
         int? minMagicalAttack,
         int? minHealing,
         int? minAbilityPotency,
+        int? minDamagePercentage,
         int? maxAbilityAtbCost,
+        int? effectTier,
         bool? isLimited,
         decimal? minCommunityRating,
         string? search,
@@ -51,10 +58,14 @@ app.MapGet("/api/weapons", async (
             Category = Enum.TryParse<FinalFantasyECW.Api.Enums.WeaponCategory>(category, true, out var c) ? c : null,
             Element = Enum.TryParse<FinalFantasyECW.Api.Enums.ElementType>(element, true, out var e) ? e : null,
             AbilityType = Enum.TryParse<FinalFantasyECW.Api.Enums.AbilityType>(abilityType, true, out var a) ? a : null,
+            AbilityElement = Enum.TryParse<FinalFantasyECW.Api.Enums.ElementType>(abilityElement, true, out var ae) ? ae : null,
+            EffectType = Enum.TryParse<FinalFantasyECW.Api.Enums.AbilityEffectType>(effectType, true, out var et) ? et : null,
+            EffectTier = effectTier is >= 1 and <= 3 ? (FinalFantasyECW.Api.Enums.EffectTier)effectTier.Value : null,
             MinPhysicalAttack = minPhysicalAttack,
             MinMagicalAttack = minMagicalAttack,
             MinHealing = minHealing,
             MinAbilityPotency = minAbilityPotency,
+            MinDamagePercentage = minDamagePercentage,
             MaxAbilityAtbCost = maxAbilityAtbCost,
             IsLimited = isLimited,
             MinCommunityRating = minCommunityRating,

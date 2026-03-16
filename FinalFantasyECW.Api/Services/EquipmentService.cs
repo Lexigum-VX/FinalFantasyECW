@@ -24,7 +24,10 @@ public sealed class EquipmentService(AppDbContext dbContext)
 
     public async Task<IReadOnlyCollection<Weapon>> GetWeaponsAsync(WeaponFilterRequest filter, CancellationToken cancellationToken = default)
     {
-        var query = dbContext.Weapons.AsNoTracking().AsQueryable();
+        var query = dbContext.Weapons
+            .AsNoTracking()
+            .Include(w => w.AbilityEffects)
+            .AsQueryable();
 
         if (filter.CharacterId.HasValue)
             query = query.Where(w => w.CharacterId == filter.CharacterId.Value);
@@ -38,6 +41,9 @@ public sealed class EquipmentService(AppDbContext dbContext)
         if (filter.AbilityType.HasValue)
             query = query.Where(w => w.AbilityType == filter.AbilityType.Value);
 
+        if (filter.AbilityElement.HasValue)
+            query = query.Where(w => w.AbilityElement == filter.AbilityElement.Value);
+
         if (filter.MinPhysicalAttack.HasValue)
             query = query.Where(w => w.PhysicalAttack >= filter.MinPhysicalAttack.Value);
 
@@ -50,8 +56,17 @@ public sealed class EquipmentService(AppDbContext dbContext)
         if (filter.MinAbilityPotency.HasValue)
             query = query.Where(w => w.AbilityPotency >= filter.MinAbilityPotency.Value);
 
+        if (filter.MinDamagePercentage.HasValue)
+            query = query.Where(w => w.DamagePercentage >= filter.MinDamagePercentage.Value);
+
         if (filter.MaxAbilityAtbCost.HasValue)
             query = query.Where(w => w.AbilityAtbCost <= filter.MaxAbilityAtbCost.Value);
+
+        if (filter.EffectType.HasValue)
+            query = query.Where(w => w.AbilityEffects.Any(effect => effect.EffectType == filter.EffectType.Value));
+
+        if (filter.EffectTier.HasValue)
+            query = query.Where(w => w.AbilityEffects.Any(effect => effect.Tier >= filter.EffectTier.Value));
 
         if (filter.IsLimited.HasValue)
             query = query.Where(w => w.IsLimited == filter.IsLimited.Value);

@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>FFEC Weapons Explorer (Mock)</title>
+  <style>
+    body { font-family: Inter, Arial, sans-serif; margin: 24px; background: #0f172a; color: #e2e8f0; }
+    h1 { margin-bottom: 8px; }
+    .sub { color: #94a3b8; margin-bottom: 20px; }
+    .filters { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 18px; }
+    select, input { width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: #e2e8f0; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
+    .card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 12px; }
+    .chip { display: inline-block; margin: 4px 6px 0 0; padding: 4px 8px; border-radius: 999px; font-size: 12px; background: #334155; }
+    .muted { color: #94a3b8; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <h1>Armas e habilidades (mock)</h1>
+  <p class="sub">Pré-visualização com filtros: elemento, % dano, tipo de efeito e tier.</p>
+
+  <div class="filters">
+    <div>
+      <label>Elemento</label>
+      <select id="elementFilter">
+        <option value="">Todos</option>
+        <option>Fire</option><option>Ice</option><option>Lightning</option><option>Earth</option><option>Wind</option><option>Water</option><option>Holy</option><option>Dark</option><option>None</option>
+      </select>
+    </div>
+    <div>
+      <label>Tipo de efeito</label>
+      <select id="effectTypeFilter">
+        <option value="">Todos</option>
+        <option>IncreaseDefense</option>
+        <option>DecreaseDefense</option>
+        <option>IncreasePhysicalAttack</option>
+        <option>IncreaseMagicalAttack</option>
+      </select>
+    </div>
+    <div>
+      <label>Tier mínimo</label>
+      <select id="tierFilter">
+        <option value="">Qualquer</option>
+        <option value="1">Tier1</option>
+        <option value="2">Tier2</option>
+        <option value="3">Tier3</option>
+      </select>
+    </div>
+    <div>
+      <label>% dano mínima</label>
+      <input id="damageFilter" type="number" min="0" value="0" />
+    </div>
+  </div>
+
+  <div id="results" class="grid"></div>
+
+<script>
+const tierValue = { Tier1: 1, Tier2: 2, Tier3: 3 };
+const results = document.getElementById('results');
+
+async function loadData() {
+  const res = await fetch('/mock/weapons.json');
+  const items = await res.json();
+  return items;
+}
+
+function render(weapons) {
+  results.innerHTML = weapons.map(w => `
+    <article class="card">
+      <h3>${w.name}</h3>
+      <div class="muted">${w.character} · ${w.abilityName}</div>
+      <div class="chip">Elemento: ${w.abilityElement}</div>
+      <div class="chip">Dano: ${w.damagePercentage}%</div>
+      <div style="margin-top:8px;">${w.effects.map(e => `<span class="chip">${e.effectType} · ${e.tier} (${e.valuePercentage}%)</span>`).join('')}</div>
+    </article>
+  `).join('');
+
+  if (weapons.length === 0) {
+    results.innerHTML = '<p class="muted">Sem resultados para estes filtros.</p>';
+  }
+}
+
+function filterWeapons(weapons) {
+  const element = document.getElementById('elementFilter').value;
+  const effectType = document.getElementById('effectTypeFilter').value;
+  const minTier = Number(document.getElementById('tierFilter').value || 0);
+  const minDamage = Number(document.getElementById('damageFilter').value || 0);
+
+  return weapons.filter(w => {
+    const matchElement = !element || w.abilityElement === element;
+    const matchDamage = w.damagePercentage >= minDamage;
+    const matchEffects = w.effects.some(e => (!effectType || e.effectType === effectType) && (!minTier || tierValue[e.tier] >= minTier));
+    return matchElement && matchDamage && matchEffects;
+  });
+}
+
+(async function init() {
+  const data = await loadData();
+  const controls = ['elementFilter', 'effectTypeFilter', 'tierFilter', 'damageFilter'];
+  const refresh = () => render(filterWeapons(data));
+  controls.forEach(id => document.getElementById(id).addEventListener('input', refresh));
+  refresh();
+})();
+</script>
+</body>
+</html>
