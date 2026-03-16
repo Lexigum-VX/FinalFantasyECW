@@ -1,27 +1,31 @@
 # FinalFantasyECW - Web API (.NET 10 + Entity Framework Core)
 
-API para builds de **Final Fantasy VII Ever Crisis**, agora baseada em **Entity Framework Core** com **SQLite** para que todos os dados venham da base de dados.
+API para builds de **Final Fantasy VII Ever Crisis**, baseada em **Entity Framework Core** com **SQLite**, com frontend estático para exploração rápida dos dados.
 
-## O que foi melhorado
-- Persistência com EF Core (`AppDbContext`)
-- Seed inicial na base de dados (`DbSeeder`) para 16 personagens
-- Modelo de arma expandido com suporte a **% de dano**, **elemento da habilidade** e **múltiplos efeitos por habilidade com tiers**
-- Filtros avançados para otimizar criação de builds
-- Cálculo de build com regra de equipamento (1 principal 100% + até 4 secundárias 50%)
-- Frontend mock em `/` para visualizar rapidamente as armas e filtros
+## Resumo do que a aplicação faz
+
+A aplicação fornece uma API para:
+- listar personagens;
+- listar armas com filtros avançados (categoria, elemento, tipo de habilidade, tier de efeito, limites de ATB, rating, pesquisa textual, paginação, etc.);
+- listar outfits (global ou por personagem);
+- calcular builds com regras de equipamento (1 arma principal a 100% + até 4 secundárias a 50%).
+
+Além da API, a rota `/` serve um frontend mock (`wwwroot/index.html`) que facilita testes rápidos de filtros sem precisar de Postman/curl.
+
+## Arquitetura (resumo)
+
+- **Program.cs**: bootstrap da aplicação, DI, EF Core, OpenAPI e mapeamento de controllers.
+- **Controllers/EquipmentController.cs**: endpoints HTTP (`/api/characters`, `/api/weapons`, `/api/outfits`, `/api/builds/calculate`).
+- **Services/EquipmentService.cs**: regras de negócio (filtros, validações e cálculo de build).
+- **Data/AppDbContext.cs** + **Data/DbSeeder.cs**: acesso a dados e seed inicial.
+- **Models/** e **Dtos/**: contratos da API e entidades persistidas.
 
 ## Stack
-- ASP.NET Core Minimal API
+
+- ASP.NET Core Web API (Controllers)
 - .NET 10 (`net10.0`)
 - Entity Framework Core + SQLite
-
-## Propriedades da arma (v2)
-Inclui propriedades do jogo e extras de pesquisa:
-- Base: `PhysicalAttack`, `MagicalAttack`, `Healing`, `Hp`, `PhysicalDefense`, `MagicalDefense`
-- Meta: `Category`, `Element`, `Rarity`, `OverboostLevel`
-- Habilidade: `AbilityName`, `AbilityDescription`, `AbilityType`, `AbilityTarget`, `AbilityElement`, `DamagePercentage`, `AbilityPotency`, `AbilityAtbCost`, `AbilityDurationSeconds`, `StatusEffect`
-- Efeitos da habilidade (`WeaponAbilityEffect`): `EffectType`, `Tier` (`Tier1-3`), `ValuePercentage`
-- Pesquisa avançada: `IsLimited`, `ReleaseDate`, `SourceBanner`, `Tags`, `NormalizedSearchText`, `CommunityRating`, `PopularityScore`
+- OpenAPI
 
 ## Endpoints
 
@@ -55,27 +59,81 @@ curl "http://localhost:5000/api/weapons?abilityElement=Fire&effectType=IncreaseP
 ```
 
 ### `GET /api/outfits`
-Lista fatos, opcionalmente por personagem (`characterId`).
+Lista outfits, opcionalmente por personagem (`characterId`).
 
 ### `POST /api/builds/calculate`
 Calcula build:
-- Arma principal: 100%
-- Secundárias (máx. 4): 50%
+- arma principal: 100%
+- secundárias (máx. 4): 50%
 
-## Frontend mock
-A rota `/` serve um frontend simples (`wwwroot/index.html`) com dados mock (`wwwroot/mock/weapons.json`) para testar rapidamente:
-- filtro por elemento da habilidade
-- filtro por tipo de efeito
-- filtro por tier mínimo
-- filtro por % mínima de dano
+## Como resolver "SDK .NET não está instalado"
 
-## Execução local
+Neste projeto é necessário **.NET SDK 10 (preview)**, porque o `TargetFramework` é `net10.0`.
+
+### 1) Verificar se tens SDK
+```bash
+dotnet --info
+```
+
+Se não existir comando `dotnet` ou não aparecer `10.0.x`, instala o SDK.
+
+### 2) Instalar o SDK .NET 10 Preview
+
+Site oficial da Microsoft:
+- https://dotnet.microsoft.com/download/dotnet/10.0
+
+Escolhe o instalador do teu sistema operativo.
+
+#### Ubuntu/Debian (exemplo genérico)
+Segue os comandos oficiais da Microsoft para adicionar feed e instalar `dotnet-sdk-10.0`.
+
+#### Windows
+- Instalar o `.exe` do SDK.
+- Reiniciar terminal/VS Code.
+
+#### macOS
+- Instalar `.pkg` oficial.
+- Reiniciar terminal.
+
+### 3) Confirmar instalação
+```bash
+dotnet --list-sdks
+```
+Deves ver uma linha `10.0.xxx`.
+
+## Guia completo para clonar e correr na tua máquina
+
+### Pré-requisitos
+- Git
+- .NET SDK 10 Preview
+
+### Passos
+
+1. Clonar repositório:
+```bash
+git clone <URL_DO_REPOSITORIO>
+cd FinalFantasyECW
+```
+
+2. Restaurar pacotes:
 ```bash
 dotnet restore
+```
+
+3. Correr API:
+```bash
 dotnet run --project FinalFantasyECW.Api
 ```
 
-A aplicação cria automaticamente a base de dados SQLite e faz seed na primeira execução.
+4. Abrir aplicação:
+- API: URL mostrada na consola (normalmente `http://localhost:5000` ou `https://localhost:7xxx`)
+- Frontend mock: mesma base URL, rota `/`
 
-## Notas de ambiente deste workspace
-Neste ambiente não foi possível correr `dotnet` porque o SDK não está instalado.
+### Base de dados
+- A aplicação cria/usa SQLite automaticamente.
+- O seed inicial é aplicado no arranque via `DbSeeder`.
+
+## Melhorias feitas nesta revisão
+- Endpoints que estavam todos em `Program.cs` foram movidos para `Controllers/EquipmentController.cs`.
+- `Program.cs` ficou mais limpo e focado em configuração e pipeline.
+
