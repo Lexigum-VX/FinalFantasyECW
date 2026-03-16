@@ -1,0 +1,50 @@
+[
+  {
+    "id": "20000000-0000-0000-0000-000000000001",
+    "name": "Cloud Weapon A",
+    "character": "Cloud",
+    "abilityName": "Brave Slash",
+    "damagePercentage": 760,
+    "abilityElement": "Fire",
+    "effects": [
+      { "effectType": "IncreasePhysicalAttack", "tier": "Tier3", "valuePercentage": 30 },
+      { "effectType": "DecreaseDefense", "tier": "Tier2", "valuePercentage": 20 }
+    ]
+  },
+  {
+    "id": "20000000-0000-0000-0000-000000000002",
+    "name": "Cloud Weapon B",
+    "character": "Cloud",
+    "abilityName": "Curaga Pulse",
+    "damagePercentage": 820,
+    "abilityElement": "Lightning",
+    "effects": [
+      { "effectType": "IncreaseMagicalAttack", "tier": "Tier2", "valuePercentage": 20 },
+      { "effectType": "IncreaseDefense", "tier": "Tier1", "valuePercentage": 10 }
+    ]
+  },
+  {
+    "id": "20000000-0000-0000-0000-000000000003",
+    "name": "Tifa Weapon A",
+    "character": "Tifa",
+    "abilityName": "Magic Break",
+    "damagePercentage": 700,
+    "abilityElement": "Wind",
+    "effects": [
+      { "effectType": "DecreaseDefense", "tier": "Tier3", "valuePercentage": 30 },
+      { "effectType": "IncreasePhysicalAttack", "tier": "Tier1", "valuePercentage": 10 }
+    ]
+  },
+  {
+    "id": "20000000-0000-0000-0000-000000000004",
+    "name": "Aerith Weapon C",
+    "character": "Aerith",
+    "abilityName": "Regen Veil",
+    "damagePercentage": 0,
+    "abilityElement": "None",
+    "effects": [
+      { "effectType": "IncreaseDefense", "tier": "Tier3", "valuePercentage": 30 },
+      { "effectType": "IncreaseMagicalAttack", "tier": "Tier2", "valuePercentage": 20 }
+    ]
+  }
+]

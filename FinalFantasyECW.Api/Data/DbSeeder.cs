@@ -44,9 +44,9 @@ public static class DbSeeder
         {
             var baseRelease = new DateOnly(2024, 1, 1).AddDays(index * 7);
 
-            weapons.Add(CreateWeapon(character, index, "A", WeaponCategory.Sword, abilities[index % abilities.Length], elements[index % elements.Length], AbilityType.PhysicalDamage, 130 + (index * 6), 70 + (index * 3), 40 + index, 300 + index * 5, 20 + index, 20 + index, 700 + index * 15, 3, false, baseRelease, "Launch"));
-            weapons.Add(CreateWeapon(character, index, "B", WeaponCategory.Staff, abilities[(index + 2) % abilities.Length], elements[(index + 2) % elements.Length], AbilityType.MagicalDamage, 90 + (index * 4), 120 + (index * 6), 55 + index, 280 + index * 4, 18 + index, 24 + index, 760 + index * 14, 4, index % 2 == 0, baseRelease.AddDays(10), "Event Banner"));
-            weapons.Add(CreateWeapon(character, index, "C", WeaponCategory.Gun, abilities[(index + 4) % abilities.Length], elements[(index + 4) % elements.Length], AbilityType.Heal, 70 + (index * 3), 80 + (index * 4), 130 + (index * 5), 260 + index * 5, 16 + index, 26 + index, 640 + index * 16, 4, index % 3 == 0, baseRelease.AddDays(20), "Seasonal Banner"));
+            weapons.Add(CreateWeapon(character, index, "A", WeaponCategory.Sword, abilities[index % abilities.Length], elements[index % elements.Length], AbilityType.PhysicalDamage, 320 + (index * 8), 130 + (index * 4), 70 + index, 300 + index * 5, 20 + index, 20 + index, 700 + index * 15, 3, false, baseRelease, "Launch", 760));
+            weapons.Add(CreateWeapon(character, index, "B", WeaponCategory.Staff, abilities[(index + 2) % abilities.Length], elements[(index + 2) % elements.Length], AbilityType.MagicalDamage, 180 + (index * 4), 360 + (index * 8), 90 + index, 280 + index * 4, 18 + index, 24 + index, 760 + index * 14, 4, index % 2 == 0, baseRelease.AddDays(10), "Event Banner", 820));
+            weapons.Add(CreateWeapon(character, index, "C", WeaponCategory.Gun, abilities[(index + 4) % abilities.Length], elements[(index + 4) % elements.Length], AbilityType.Heal, 140 + (index * 3), 150 + (index * 4), 330 + (index * 5), 260 + index * 5, 16 + index, 26 + index, 640 + index * 16, 4, index % 3 == 0, baseRelease.AddDays(20), "Seasonal Banner", 0));
 
             outfits.Add(new Outfit
             {
@@ -84,15 +84,21 @@ public static class DbSeeder
         int atbCost,
         bool isLimited,
         DateOnly releaseDate,
-        string source)
+        string source,
+        int damagePercentage)
     {
         var name = $"{character.Name} Weapon {suffix}";
-        var tags = $"{character.Code},{abilityType.ToString().ToLowerInvariant()},{element.ToString().ToLowerInvariant()}";
+        var effects = BuildEffects(index, suffix);
+        var effectTags = string.Join(',', effects.Select(x => x.EffectType.ToString().ToLowerInvariant()));
+        var tags = $"{character.Code},{abilityType.ToString().ToLowerInvariant()},{element.ToString().ToLowerInvariant()},{effectTags}";
         var normalizedSearch = $"{name} {abilityName} {tags}".ToLowerInvariant();
+
+        var weaponId = Guid.Parse($"20000000-0000-0000-0000-{(index * 3 + (suffix[0] - 'A') + 1).ToString("D12")}");
+        effects.ForEach(effect => effect.WeaponId = weaponId);
 
         return new Weapon
         {
-            Id = Guid.Parse($"20000000-0000-0000-0000-{(index * 3 + (suffix[0] - 'A') + 1).ToString("D12")}"),
+            Id = weaponId,
             Name = name,
             CharacterId = character.Id,
             Category = category,
@@ -110,10 +116,12 @@ public static class DbSeeder
             AbilityType = abilityType,
             AbilityTarget = abilityType == AbilityType.Heal ? AbilityTarget.SingleAlly : AbilityTarget.SingleEnemy,
             AbilityElement = element,
+            DamagePercentage = damagePercentage,
             AbilityPotency = potency,
             AbilityAtbCost = atbCost,
             AbilityDurationSeconds = abilityType is AbilityType.Buff or AbilityType.Debuff ? 12 : 0,
             StatusEffect = abilityType is AbilityType.Buff or AbilityType.Debuff ? "Buff/Debuff" : null,
+            AbilityEffects = effects,
             IsLimited = isLimited,
             ReleaseDate = releaseDate,
             SourceBanner = source,
@@ -122,5 +130,37 @@ public static class DbSeeder
             CommunityRating = 3.5m + (index % 3) * 0.3m,
             PopularityScore = 50 + (index * 3)
         };
+    }
+
+    private static List<WeaponAbilityEffect> BuildEffects(int index, string suffix)
+    {
+        var suffixOffset = suffix[0] - 'A';
+        var firstTier = (EffectTier)(((index + suffixOffset) % 3) + 1);
+        var secondTier = (EffectTier)(((index + suffixOffset + 1) % 3) + 1);
+
+        return
+        [
+            new()
+            {
+                Id = Guid.NewGuid(),
+                EffectType = AbilityEffectType.IncreasePhysicalAttack,
+                Tier = firstTier,
+                ValuePercentage = firstTier switch { EffectTier.Tier1 => 10, EffectTier.Tier2 => 20, _ => 30 }
+            },
+            new()
+            {
+                Id = Guid.NewGuid(),
+                EffectType = index % 2 == 0 ? AbilityEffectType.DecreaseDefense : AbilityEffectType.IncreaseDefense,
+                Tier = secondTier,
+                ValuePercentage = secondTier switch { EffectTier.Tier1 => 10, EffectTier.Tier2 => 20, _ => 30 }
+            },
+            new()
+            {
+                Id = Guid.NewGuid(),
+                EffectType = AbilityEffectType.IncreaseMagicalAttack,
+                Tier = (EffectTier)(((index + suffixOffset + 2) % 3) + 1),
+                ValuePercentage = 15
+            }
+        ];
     }
 }

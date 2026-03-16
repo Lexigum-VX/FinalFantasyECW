@@ -28,10 +28,13 @@ public sealed class Weapon
     public AbilityType AbilityType { get; set; }
     public AbilityTarget AbilityTarget { get; set; }
     public ElementType AbilityElement { get; set; }
+    public int DamagePercentage { get; set; }
     public int AbilityPotency { get; set; }
     public int AbilityAtbCost { get; set; }
     public int AbilityDurationSeconds { get; set; }
     public string? StatusEffect { get; set; }
+
+    public ICollection<WeaponAbilityEffect> AbilityEffects { get; set; } = new List<WeaponAbilityEffect>();
 
     // Propriedades adicionais para pesquisa avançada
     public bool IsLimited { get; set; }

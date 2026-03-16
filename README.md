@@ -5,20 +5,22 @@ API para builds de **Final Fantasy VII Ever Crisis**, agora baseada em **Entity 
 ## O que foi melhorado
 - Persistência com EF Core (`AppDbContext`)
 - Seed inicial na base de dados (`DbSeeder`) para 16 personagens
-- Modelo de arma expandido com mais propriedades para pesquisa avançada
+- Modelo de arma expandido com suporte a **% de dano**, **elemento da habilidade** e **múltiplos efeitos por habilidade com tiers**
 - Filtros avançados para otimizar criação de builds
 - Cálculo de build com regra de equipamento (1 principal 100% + até 4 secundárias 50%)
+- Frontend mock em `/` para visualizar rapidamente as armas e filtros
 
 ## Stack
 - ASP.NET Core Minimal API
 - .NET 10 (`net10.0`)
 - Entity Framework Core + SQLite
 
-## Propriedades da arma (v1)
+## Propriedades da arma (v2)
 Inclui propriedades do jogo e extras de pesquisa:
 - Base: `PhysicalAttack`, `MagicalAttack`, `Healing`, `Hp`, `PhysicalDefense`, `MagicalDefense`
 - Meta: `Category`, `Element`, `Rarity`, `OverboostLevel`
-- Habilidade: `AbilityName`, `AbilityDescription`, `AbilityType`, `AbilityTarget`, `AbilityElement`, `AbilityPotency`, `AbilityAtbCost`, `AbilityDurationSeconds`, `StatusEffect`
+- Habilidade: `AbilityName`, `AbilityDescription`, `AbilityType`, `AbilityTarget`, `AbilityElement`, `DamagePercentage`, `AbilityPotency`, `AbilityAtbCost`, `AbilityDurationSeconds`, `StatusEffect`
+- Efeitos da habilidade (`WeaponAbilityEffect`): `EffectType`, `Tier` (`Tier1-3`), `ValuePercentage`
 - Pesquisa avançada: `IsLimited`, `ReleaseDate`, `SourceBanner`, `Tags`, `NormalizedSearchText`, `CommunityRating`, `PopularityScore`
 
 ## Endpoints
@@ -32,10 +34,14 @@ Filtros disponíveis (query string):
 - `category`
 - `element`
 - `abilityType`
+- `abilityElement`
+- `effectType`
+- `effectTier` (1-3)
 - `minPhysicalAttack`
 - `minMagicalAttack`
 - `minHealing`
 - `minAbilityPotency`
+- `minDamagePercentage`
 - `maxAbilityAtbCost`
 - `isLimited`
 - `minCommunityRating`
@@ -45,7 +51,7 @@ Filtros disponíveis (query string):
 
 Exemplo:
 ```bash
-curl "http://localhost:5000/api/weapons?element=Fire&abilityType=PhysicalDamage&minPhysicalAttack=140&search=break&page=1&pageSize=20"
+curl "http://localhost:5000/api/weapons?abilityElement=Fire&effectType=IncreasePhysicalAttack&effectTier=2&minDamagePercentage=700&page=1&pageSize=20"
 ```
 
 ### `GET /api/outfits`
@@ -56,39 +62,12 @@ Calcula build:
 - Arma principal: 100%
 - Secundárias (máx. 4): 50%
 
-Payload:
-```json
-{
-  "characterId": "00000000-0000-0000-0000-000000000001",
-  "primaryWeaponId": "20000000-0000-0000-0000-000000000001",
-  "secondaryWeaponIds": [
-    "20000000-0000-0000-0000-000000000002",
-    "20000000-0000-0000-0000-000000000003"
-  ]
-}
-```
-
-## Planeamento (roadmap)
-
-### Fase 1 (atual)
-- API + EF Core + SQLite
-- Modelo completo inicial de personagens, armas e fatos
-- Filtros e cálculo de build
-
-### Fase 2
-- Criar migrações EF e scripts de deploy (`dotnet ef migrations`)
-- Trocar SQLite por PostgreSQL/SQL Server
-- Índices avançados (FTS para pesquisa textual)
-
-### Fase 3
-- Autenticação (JWT)
-- Tabelas de utilizador/inventário (`UserWeapons`, níveis de overboost reais, favoritos)
-- Endpoint de recomendações de build por objetivo (DPS, cura, debuff)
-
-### Fase 4
-- Frontend (React/Blazor)
-- Builder visual drag-and-drop
-- Partilha de builds por link
+## Frontend mock
+A rota `/` serve um frontend simples (`wwwroot/index.html`) com dados mock (`wwwroot/mock/weapons.json`) para testar rapidamente:
+- filtro por elemento da habilidade
+- filtro por tipo de efeito
+- filtro por tier mínimo
+- filtro por % mínima de dano
 
 ## Execução local
 ```bash

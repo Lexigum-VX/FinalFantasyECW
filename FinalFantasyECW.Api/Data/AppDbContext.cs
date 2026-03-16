@@ -7,6 +7,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
 {
     public DbSet<Character> Characters => Set<Character>();
     public DbSet<Weapon> Weapons => Set<Weapon>();
+    public DbSet<WeaponAbilityEffect> WeaponAbilityEffects => Set<WeaponAbilityEffect>();
     public DbSet<Outfit> Outfits => Set<Outfit>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -33,12 +34,26 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
             entity.HasIndex(x => x.CharacterId);
             entity.HasIndex(x => x.Element);
             entity.HasIndex(x => x.AbilityType);
+            entity.HasIndex(x => x.AbilityElement);
             entity.HasIndex(x => x.CommunityRating);
             entity.HasIndex(x => x.NormalizedSearchText);
 
             entity.HasOne(x => x.Character)
                 .WithMany(x => x.Weapons)
                 .HasForeignKey(x => x.CharacterId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<WeaponAbilityEffect>(entity =>
+        {
+            entity.HasKey(x => x.Id);
+            entity.HasIndex(x => x.WeaponId);
+            entity.HasIndex(x => x.EffectType);
+            entity.HasIndex(x => x.Tier);
+
+            entity.HasOne(x => x.Weapon)
+                .WithMany(x => x.AbilityEffects)
+                .HasForeignKey(x => x.WeaponId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
 

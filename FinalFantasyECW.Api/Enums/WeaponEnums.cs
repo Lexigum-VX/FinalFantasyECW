@@ -46,3 +46,18 @@ public enum AbilityTarget
     AllAllies,
     Self
 }
+
+public enum AbilityEffectType
+{
+    IncreaseDefense,
+    DecreaseDefense,
+    IncreasePhysicalAttack,
+    IncreaseMagicalAttack
+}
+
+public enum EffectTier
+{
+    Tier1 = 1,
+    Tier2 = 2,
+    Tier3 = 3
+}
